@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.sql.*;
 
-public class JournalsService extends ConnectUtil implements JournalsDAO {
-    Connection connection = getConnection();
+public class JournalsService implements JournalsDAO {
+    private static final Connection connection = ConnectUtil.getInstance();
 
     @Override
     public void add(Journals journal) throws SQLException{

@@ -12,9 +12,9 @@ import java.sql.*;
 import java.sql.SQLException;
 import db.ConnectUtil;
 
-public class QueryManagement extends ConnectUtil implements MySQL{
+public class QueryManagement implements MySQL{
 
-    Connection connection = getConnection();
+    private static final Connection connection = ConnectUtil.getInstance();
 
 
     public static void addPreparedLine(String data) {

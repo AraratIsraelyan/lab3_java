@@ -1,35 +1,31 @@
 package db.services;
 
 import db.ConnectUtil;
-import db.dao.CoverDAO;
+import db.dao.ForeignTablesDAO;
 import db.entity.Covers;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CoversService extends ConnectUtil implements CoverDAO {
-    Connection connection = getConnection();
+public class CoversService implements ForeignTablesDAO<Covers> {
+    private static final Connection connection = ConnectUtil.getInstance();
 
     @Override
     public void add(Covers cover) throws SQLException {
         PreparedStatement preparedStatement = null;
 
-        String sql = "INSERT INTO covers (id, name) VALUES (?, ?)";
+        String sql = "INSERT INTO covers (name) VALUES (?)";
 
         try{
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, cover.getId());
-            preparedStatement.setString(2,cover.getName());
+            preparedStatement.setString(1,cover.getName());
             preparedStatement.executeUpdate();
         }
         catch (SQLException e){e.printStackTrace();}
         finally {
             if (preparedStatement != null){
                 preparedStatement.close();
-            }
-            if (connection != null){
-                connection.close();
             }
         }
     }
@@ -61,9 +57,6 @@ public class CoversService extends ConnectUtil implements CoverDAO {
             if (statement != null){
                 statement.close();
             }
-            if (connection != null){
-                connection.close();
-            }
         }
         return coversList;
     }
@@ -89,9 +82,6 @@ public class CoversService extends ConnectUtil implements CoverDAO {
             if (preparedStatement != null){
                 preparedStatement.close();
             }
-            if (connection != null){
-                connection.close();
-            }
         }
         return cover;
     }
@@ -115,9 +105,6 @@ public class CoversService extends ConnectUtil implements CoverDAO {
             if (preparedStatement != null){
                 preparedStatement.close();
             }
-            if (connection != null){
-                connection.close();
-            }
         }
     }
 
@@ -137,9 +124,50 @@ public class CoversService extends ConnectUtil implements CoverDAO {
             if (preparedStatement != null){
                 preparedStatement.close();
             }
-            if (connection != null){
-                connection.close();
-            }
         }
     }
+
+    @Override
+    public Covers getOrAdd(String name) throws SQLException {
+
+        Covers covers = getByName(name);
+
+        if (covers == null) {
+            Covers coversToAdd = new Covers();
+            coversToAdd.setName(name);
+            add(coversToAdd);
+            return getByName(name);
+        }
+
+        return covers;
+    }
+
+    private Covers getByName(String name) throws SQLException {
+
+        PreparedStatement preparedStatement = null;
+        String sql = "SELECT id, name FROM covers WHERE name=?";
+        Covers cover = new Covers();
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, name);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                return null;
+            }
+            cover.setId(resultSet.getInt("id"));
+            cover.setName(resultSet.getString("name"));
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            if (preparedStatement != null){
+                preparedStatement.close();
+            }
+        }
+        return cover;
+    }
+
+
 }

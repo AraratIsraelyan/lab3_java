@@ -9,8 +9,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BooksService extends ConnectUtil implements BooksDAO {
-    Connection connection = getConnection();
+public class BooksService implements BooksDAO {
+    private static final Connection connection = ConnectUtil.getInstance();
 
     @Override
     public void add(Books book) throws SQLException{
