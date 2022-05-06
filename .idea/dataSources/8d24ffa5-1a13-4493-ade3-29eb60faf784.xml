@@ -866,7 +866,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <Primary>1</Primary>
     </key>
     <column id="247" parent="234" name="id">
-      <AutoIncrement>4</AutoIncrement>
+      <AutoIncrement>2</AutoIncrement>
       <DataType>int(11)|0s</DataType>
       <NotNull>1</NotNull>
       <Position>1</Position>

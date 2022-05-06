@@ -71,9 +71,10 @@ public class CoversService implements ForeignTablesDAO<Covers> {
             preparedStatement.setInt(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            cover.setId(resultSet.getInt("id"));
-            cover.setName(resultSet.getString("name"));
-            preparedStatement.executeUpdate();
+            if (resultSet.next()) {
+                cover.setId(resultSet.getInt("id"));
+                cover.setName(resultSet.getString("name"));
+            }
         }
         catch (SQLException e){
             e.printStackTrace();
@@ -133,9 +134,9 @@ public class CoversService implements ForeignTablesDAO<Covers> {
         Covers covers = getByName(name);
 
         if (covers == null) {
-            Covers coversToAdd = new Covers();
-            coversToAdd.setName(name);
-            add(coversToAdd);
+            covers = new Covers();
+            covers.setName(name);
+            add(covers);
             return getByName(name);
         }
 

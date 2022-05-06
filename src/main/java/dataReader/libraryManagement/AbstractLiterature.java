@@ -1,8 +1,9 @@
 package dataReader.libraryManagement;
 
 import dataReader.interfaces.CatalogLiterature;
+import db.entity.Books;
 
-public class AbstractLiterature implements CatalogLiterature {
+public abstract class AbstractLiterature implements CatalogLiterature {
 
     protected String type;
     protected String name;
@@ -50,6 +51,8 @@ public class AbstractLiterature implements CatalogLiterature {
         name = strings[1];
         publisher = strings[2];
         year = strings[3];
+
+
     }
 
     @Override

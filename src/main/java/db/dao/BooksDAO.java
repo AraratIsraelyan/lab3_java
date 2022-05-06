@@ -20,7 +20,4 @@ public interface BooksDAO {
     //delete
     void remove(Books book) throws SQLException;
 
-    Books getByPublisher(int publisher_id) throws SQLException;
-
-    Books getByCover(int cover_id) throws SQLException;
 }

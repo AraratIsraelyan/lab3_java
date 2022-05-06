@@ -74,10 +74,11 @@ public class PublishersService implements ForeignTablesDAO<Publishers> {
         try {
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
-
             ResultSet resultSet = preparedStatement.executeQuery();
-            publisher.setId(resultSet.getInt("id"));
-            publisher.setName(resultSet.getString("name"));
+            if (resultSet.next()) {
+                publisher.setId(resultSet.getInt("id"));
+                publisher.setName(resultSet.getString("name"));
+            }
         }
         catch (SQLException e){
             e.printStackTrace();
@@ -138,9 +139,9 @@ public class PublishersService implements ForeignTablesDAO<Publishers> {
         Publishers publishers = getByName(name);
 
         if (publishers == null) {
-            Publishers publisherToAdd = new Publishers();
-            publisherToAdd.setName(name);
-            add(publisherToAdd);
+            publishers = new Publishers();
+            publishers.setName(name);
+            add(publishers);
             return getByName(name);
         }
 

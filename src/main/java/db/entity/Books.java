@@ -4,13 +4,10 @@ public class Books {
 
     private int id;
     private String name;
-    private int publisher_id;
+    private Publishers publishers;
     private int year;
     private int pages;
-    private int cover_id;
-
-    public Books() {
-    }
+    private Covers covers;
 
     public int getId() {
         return id;
@@ -28,12 +25,12 @@ public class Books {
         this.name = name;
     }
 
-    public int getPublisher_id() {
-        return publisher_id;
+    public Publishers getPublishers() {
+        return publishers;
     }
 
-    public void setPublisher_id(int publisher_id) {
-        this.publisher_id = publisher_id;
+    public void setPublishers(Publishers publishers) {
+        this.publishers = publishers;
     }
 
     public int getYear() {
@@ -52,49 +49,26 @@ public class Books {
         this.pages = pages;
     }
 
-    public int getCover_id() {
-        return cover_id;
+    public Covers getCovers() {
+        return covers;
     }
 
-    public void setCover_id(int cover_id) {
-        this.cover_id = cover_id;
+    public void setCovers(Covers covers) {
+        this.covers = covers;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Books books = (Books) o;
-
-        if (id != books.id) return false;
-        if (publisher_id != books.publisher_id) return false;
-        if (year != books.year) return false;
-        if (pages != books.pages) return false;
-        if (cover_id != books.cover_id) return false;
-        return name != null ? name.equals(books.name) : books.name == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + publisher_id;
-        result = 31 * result + year;
-        result = 31 * result + pages;
-        result = 31 * result + cover_id;
-        return result;
+    public Books() {
     }
 
     @Override
     public String toString() {
-        return "Books{" +
+        return "Книга{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
-                ", publisher_id=" + publisher_id +
-                ", year=" + year +
-                ", pages=" + pages +
-                ", cover_id=" + cover_id +
-                '}';
+                ", Название = '" + name + '\'' +
+                ", Издатель = " + publishers.getName() +
+                ", Год издания = " + year +
+                ", Количество страниц =" + pages +
+                ", Тип обложки =" + covers.getName() +
+                "}\n";
     }
 }

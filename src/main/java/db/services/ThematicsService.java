@@ -78,7 +78,6 @@ public class ThematicsService implements ForeignTablesDAO<Thematics> {
                 thematic.setId(resultSet.getInt("id"));
                 thematic.setName(resultSet.getString("name"));
             }
-            //preparedStatement.executeQuery();
         }
         catch (SQLException e){
             e.printStackTrace();
@@ -139,9 +138,9 @@ public class ThematicsService implements ForeignTablesDAO<Thematics> {
         Thematics thematics = getByName(name);
 
         if (thematics == null) {
-            Thematics thematicsToAdd = new Thematics();
-            thematicsToAdd.setName(name);
-            add(thematicsToAdd);
+            thematics = new Thematics();
+            thematics.setName(name);
+            add(thematics);
             return getByName(name);
         }
 
