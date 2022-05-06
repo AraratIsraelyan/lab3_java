@@ -9,21 +9,22 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BooksService extends ConnectUtil implements BooksDAO {
-    Connection connection = getConnection();
+public class BooksService implements BooksDAO {
+    private static final Connection connection = ConnectUtil.getInstance();
+    private static final PublishersService publishersService = new PublishersService();
+    private static final CoversService coversService = new CoversService();
 
     @Override
     public void add(Books book) throws SQLException{
         PreparedStatement preparedStatement = null;
-        String sql = "INSERT INTO books (id, name, publisher_id, year, pages, cover_id) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO books (name, publisher_id, year, pages, cover_id) VALUES (?, ?, ?, ?, ?)";
         try{
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, book.getId());
-            preparedStatement.setString(2,book.getName());
-            preparedStatement.setInt(3, book.getPublisher_id());
-            preparedStatement.setInt(4, book.getYear());
-            preparedStatement.setInt(5, book.getPages());
-            preparedStatement.setInt(6,book.getCover_id());
+            preparedStatement.setString(1,book.getName());
+            preparedStatement.setInt(2, book.getPublishers().getId());
+            preparedStatement.setInt(3, book.getYear());
+            preparedStatement.setInt(4, book.getPages());
+            preparedStatement.setInt(5,book.getCovers().getId());
 
             preparedStatement.executeUpdate();
         }
@@ -32,16 +33,13 @@ public class BooksService extends ConnectUtil implements BooksDAO {
             if (preparedStatement != null){
                 preparedStatement.close();
             }
-            if (connection != null){
-                connection.close();
-            }
         }
     }
 
     @Override
     public List<Books> getAll() throws SQLException{
         List<Books> booksList = new ArrayList<>();
-        String sql = "SELECT id, name FROM books";
+        String sql = "SELECT id, name, publisher_id, year, pages, cover_id FROM books";
         Statement statement = null;
         try {
             statement = connection.createStatement();
@@ -50,10 +48,10 @@ public class BooksService extends ConnectUtil implements BooksDAO {
                 Books book = new Books();
                 book.setId(resultSet.getInt("id"));
                 book.setName(resultSet.getString("name"));
-                book.setPublisher_id(resultSet.getInt("publisher_id"));
+                book.setPublishers(publishersService.getById(resultSet.getInt("publisher_id")));
                 book.setYear(resultSet.getInt("year"));
                 book.setPages(resultSet.getInt("pages"));
-                book.setCover_id(resultSet.getInt("cover_id"));
+                book.setCovers(coversService.getById(resultSet.getInt("cover_id")));
                 booksList.add(book);
             }
         }
@@ -63,9 +61,6 @@ public class BooksService extends ConnectUtil implements BooksDAO {
         finally {
             if (statement != null){
                 statement.close();
-            }
-            if (connection != null){
-                connection.close();
             }
         }
         return booksList;
@@ -81,9 +76,10 @@ public class BooksService extends ConnectUtil implements BooksDAO {
             preparedStatement.setInt(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            book.setId(resultSet.getInt("id"));
-            book.setName(resultSet.getString("name"));
-            preparedStatement.executeUpdate();
+            if (resultSet.next()) {
+                book.setId(resultSet.getInt("id"));
+                book.setName(resultSet.getString("name"));
+            }
         }
         catch (SQLException e){
             e.printStackTrace();
@@ -91,9 +87,6 @@ public class BooksService extends ConnectUtil implements BooksDAO {
         finally {
             if (preparedStatement != null){
                 preparedStatement.close();
-            }
-            if (connection != null){
-                connection.close();
             }
         }
         return book;
@@ -116,20 +109,21 @@ public class BooksService extends ConnectUtil implements BooksDAO {
             if (preparedStatement != null){
                 preparedStatement.close();
             }
-            if (connection != null){
-                connection.close();
-            }
         }
     }
 
     @Override
     public void update(Books book) throws SQLException{
         PreparedStatement preparedStatement = null;
-        String sql = "UPDATE books SET name=? WHERE id=?";
+        String sql = "UPDATE books SET name=?, publisher_id=?, year=?, pages=?, cover_id=? WHERE id=?";
         try {
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1,book.getName());
-            preparedStatement.setInt(2,book.getId());
+            preparedStatement.setInt(2,book.getPublishers().getId());
+            preparedStatement.setInt(3,book.getYear());
+            preparedStatement.setInt(4,book.getPages());
+            preparedStatement.setInt(5,book.getCovers().getId());
+            preparedStatement.setInt(6,book.getId());
             preparedStatement.executeUpdate();
         }
         catch (SQLException e){
@@ -139,61 +133,7 @@ public class BooksService extends ConnectUtil implements BooksDAO {
             if (preparedStatement != null){
                 preparedStatement.close();
             }
-            if (connection != null){
-                connection.close();
-            }
         }
-    }
-
-    @Override
-    public Books getByPublisher(int publisher_id) throws SQLException{
-        PreparedStatement preparedStatement = null;
-        Books book = new Books();
-        String sql = "SELECT id, name, publisher_id, year, number, thematic_id FROM publishers WHERE publisher_id=?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1,publisher_id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            book.setPublisher_id(resultSet.getInt("publisher_id"));
-            preparedStatement.executeQuery();
-        }
-        catch (SQLException e){
-            e.printStackTrace();
-        }finally {
-            if (preparedStatement != null){
-                preparedStatement.close();
-            }
-            if (connection != null){
-                connection.close();
-            }
-        }
-        return book;
-    }
-
-    @Override
-    public Books getByCover(int cover_id) throws SQLException{
-        PreparedStatement preparedStatement = null;
-        Books book = new Books();
-        String sql = "SELECT id, name, publisher_id, year, pages, cover_id FROM books WHERE cover_id=?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1,cover_id);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            book.setCover_id(resultSet.getInt("cover_id"));
-            preparedStatement.executeQuery();
-        }
-        catch (SQLException e){
-            e.printStackTrace();
-        }finally {
-            if (preparedStatement != null){
-                preparedStatement.close();
-            }
-            if (connection != null){
-                connection.close();
-            }
-        }
-        return book;
     }
 
 }

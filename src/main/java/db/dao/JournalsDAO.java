@@ -21,7 +21,4 @@ public interface JournalsDAO {
     //delete
     void remove(Journals journal) throws SQLException;
 
-    Journals getByPublisher(int publisher_id) throws SQLException;
-
-    Journals getByThematic(int thematic_id) throws SQLException;
 }

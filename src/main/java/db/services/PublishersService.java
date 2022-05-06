@@ -1,16 +1,17 @@
 package db.services;
 
 import db.ConnectUtil;
-import db.dao.PublishersDAO;
+import db.dao.ForeignTablesDAO;
+import db.entity.Covers;
 import db.entity.Publishers;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PublishersService extends ConnectUtil implements PublishersDAO {
+public class PublishersService implements ForeignTablesDAO<Publishers> {
 
-    Connection connection = getConnection();
+    private static final Connection connection = ConnectUtil.getInstance();
 
     @Override
     public void add(Publishers publisher) throws SQLException {
@@ -28,9 +29,6 @@ public class PublishersService extends ConnectUtil implements PublishersDAO {
         finally {
             if (preparedStatement != null){
                 preparedStatement.close();
-            }
-            if (connection != null){
-                connection.close();
             }
         }
     }
@@ -62,9 +60,6 @@ public class PublishersService extends ConnectUtil implements PublishersDAO {
             if (statement != null){
                 statement.close();
             }
-            if (connection != null){
-                connection.close();
-            }
         }
         return publishersList;
     }
@@ -79,11 +74,11 @@ public class PublishersService extends ConnectUtil implements PublishersDAO {
         try {
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
-
             ResultSet resultSet = preparedStatement.executeQuery();
-            publisher.setId(resultSet.getInt("id"));
-            publisher.setName(resultSet.getString("name"));
-            preparedStatement.executeUpdate();
+            if (resultSet.next()) {
+                publisher.setId(resultSet.getInt("id"));
+                publisher.setName(resultSet.getString("name"));
+            }
         }
         catch (SQLException e){
             e.printStackTrace();
@@ -91,9 +86,6 @@ public class PublishersService extends ConnectUtil implements PublishersDAO {
         finally {
             if (preparedStatement != null){
                 preparedStatement.close();
-            }
-            if (connection != null){
-                connection.close();
             }
         }
         return publisher;
@@ -118,9 +110,6 @@ public class PublishersService extends ConnectUtil implements PublishersDAO {
             if (preparedStatement != null){
                 preparedStatement.close();
             }
-            if (connection != null){
-                connection.close();
-            }
         }
     }
 
@@ -141,10 +130,49 @@ public class PublishersService extends ConnectUtil implements PublishersDAO {
             if (preparedStatement != null){
                 preparedStatement.close();
             }
-            if (connection != null){
-                connection.close();
-            }
         }
 
+    }
+
+    @Override
+    public Publishers getOrAdd(String name) throws SQLException {
+        Publishers publishers = getByName(name);
+
+        if (publishers == null) {
+            publishers = new Publishers();
+            publishers.setName(name);
+            add(publishers);
+            return getByName(name);
+        }
+
+        return publishers;
+    }
+
+    private Publishers getByName(String name) throws SQLException {
+
+        PreparedStatement preparedStatement = null;
+        String sql = "SELECT id, name FROM publishers WHERE name=?";
+        Publishers publishers = new Publishers();
+
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, name);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                return null;
+            }
+            publishers.setId(resultSet.getInt("id"));
+            publishers.setName(resultSet.getString("name"));
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            if (preparedStatement != null){
+                preparedStatement.close();
+            }
+        }
+        return publishers;
     }
 }

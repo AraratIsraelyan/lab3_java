@@ -5,7 +5,8 @@ import dataReader.libraryManagement.AbstractLiterature;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import dataReader.libraryManagement.QueryManagement;
+import db.services.BooksService;
+import db.services.JournalsService;
 
 public class Reader implements ReaderInterface {
 
@@ -33,13 +34,24 @@ public class Reader implements ReaderInterface {
             Books book = new Books();
             book.setData(literature);
             literatureArrayList.add(book);
-            System.out.println(book);
-            QueryManagement.addPreparedLine(String.valueOf(book));
+            BooksService booksService = new BooksService();
+            try {
+                booksService.add(book.convertData());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
         if(literature[0].equals("magazine")){
             Magazines mag = new Magazines();
             mag.setData(literature);
             literatureArrayList.add(mag);
+            JournalsService journalsService = new JournalsService();
+            try {
+                journalsService.add(mag.convertData());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+
         }
 
     }

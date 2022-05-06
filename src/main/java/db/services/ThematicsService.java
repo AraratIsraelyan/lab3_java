@@ -1,17 +1,15 @@
 package db.services;
 
 import db.ConnectUtil;
-import db.dao.CoverDAO;
-import db.dao.ThematicsDAO;
-import db.entity.Covers;
+import db.dao.ForeignTablesDAO;
 import db.entity.Thematics;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ThematicsService extends ConnectUtil implements ThematicsDAO {
-    Connection connection = getConnection();
+public class ThematicsService implements ForeignTablesDAO<Thematics> {
+    private static final Connection connection = ConnectUtil.getInstance();
 
     @Override
     public void add(Thematics thematic) throws SQLException {
@@ -29,9 +27,6 @@ public class ThematicsService extends ConnectUtil implements ThematicsDAO {
         finally {
             if (preparedStatement != null){
                 preparedStatement.close();
-            }
-            if (connection != null){
-                connection.close();
             }
         }
     }
@@ -63,9 +58,6 @@ public class ThematicsService extends ConnectUtil implements ThematicsDAO {
             if (statement != null){
                 statement.close();
             }
-            if (connection != null){
-                connection.close();
-            }
         }
         return thematicsList;
     }
@@ -86,7 +78,6 @@ public class ThematicsService extends ConnectUtil implements ThematicsDAO {
                 thematic.setId(resultSet.getInt("id"));
                 thematic.setName(resultSet.getString("name"));
             }
-            //preparedStatement.executeQuery();
         }
         catch (SQLException e){
             e.printStackTrace();
@@ -94,9 +85,6 @@ public class ThematicsService extends ConnectUtil implements ThematicsDAO {
         finally {
             if (preparedStatement != null){
                 preparedStatement.close();
-            }
-            if (connection != null){
-                connection.close();
             }
         }
         return thematic;
@@ -121,9 +109,6 @@ public class ThematicsService extends ConnectUtil implements ThematicsDAO {
             if (preparedStatement != null){
                 preparedStatement.close();
             }
-            if (connection != null){
-                connection.close();
-            }
         }
     }
 
@@ -144,11 +129,49 @@ public class ThematicsService extends ConnectUtil implements ThematicsDAO {
             if (preparedStatement != null){
                 preparedStatement.close();
             }
-            if (connection != null){
-                connection.close();
-            }
         }
 
+    }
+
+    @Override
+    public Thematics getOrAdd(String name) throws SQLException {
+        Thematics thematics = getByName(name);
+
+        if (thematics == null) {
+            thematics = new Thematics();
+            thematics.setName(name);
+            add(thematics);
+            return getByName(name);
+        }
+
+        return thematics;
+    }
+
+    private Thematics getByName(String name) throws SQLException {
+
+        PreparedStatement preparedStatement = null;
+        String sql = "SELECT id, name FROM thematics WHERE name=?";
+        Thematics thematics = new Thematics();
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, name);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (!resultSet.next()) {
+                return null;
+            }
+            thematics.setId(resultSet.getInt("id"));
+            thematics.setName(resultSet.getString("name"));
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            if (preparedStatement != null){
+                preparedStatement.close();
+            }
+        }
+        return thematics;
     }
 }
 
