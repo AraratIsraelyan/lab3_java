@@ -17,7 +17,7 @@ public class Main {
         Reader reader = new Reader();
         reader.read();
         reader.readCatalog("input_file.csv");
-
+        System.out.println("Просто проверяю");
         reader.saveFile();
     }
 
