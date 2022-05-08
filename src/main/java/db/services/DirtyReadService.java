@@ -1,20 +1,25 @@
 package db.services;
 
 import db.ConnectUtil;
-import db.dao.BooksDAO;
 import db.entity.Books;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BooksService implements BooksDAO {
-    private static final Connection connection = ConnectUtil.getInstance();
+public class DirtyReadService {
+
+    private Connection connection;
+
     private static final PublishersService publishersService = new PublishersService();
+
     private static final CoversService coversService = new CoversService();
 
-    @Override
-    public void add(Books book) throws SQLException{
+    public DirtyReadService(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void add(Books book) throws SQLException {
         PreparedStatement preparedStatement = null;
         String sql = "INSERT INTO books (name, publisher_id, year, pages, cover_id) VALUES (?, ?, ?, ?, ?)";
         try{
@@ -35,7 +40,6 @@ public class BooksService implements BooksDAO {
         }
     }
 
-    @Override
     public List<Books> getAll() throws SQLException{
         List<Books> booksList = new ArrayList<>();
         String sql = "SELECT id, name, publisher_id, year, pages, cover_id FROM books";
@@ -65,53 +69,6 @@ public class BooksService implements BooksDAO {
         return booksList;
     }
 
-    @Override
-    public Books getById(int id) throws SQLException {
-        PreparedStatement preparedStatement = null;
-        String sql = "SELECT id, name FROM books WHERE id=?";
-        Books book = new Books();
-        try {
-            preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, id);
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                book.setId(resultSet.getInt("id"));
-                book.setName(resultSet.getString("name"));
-            }
-        }
-        catch (SQLException e){
-            e.printStackTrace();
-        }
-        finally {
-            if (preparedStatement != null){
-                preparedStatement.close();
-            }
-        }
-        return book;
-    }
-
-
-    @Override
-    public void remove(Books book) throws SQLException{
-        PreparedStatement preparedStatement = null;
-        String sql = "DELETE FROM books WHERE id=?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1,book.getId());
-            preparedStatement.executeUpdate();
-        }
-        catch (SQLException e){
-            e.printStackTrace();
-        }
-        finally {
-            if (preparedStatement != null){
-                preparedStatement.close();
-            }
-        }
-    }
-
-    @Override
     public void update(Books book) throws SQLException{
         PreparedStatement preparedStatement = null;
         String sql = "UPDATE books SET name=?, publisher_id=?, year=?, pages=?, cover_id=? WHERE id=?";
@@ -135,4 +92,21 @@ public class BooksService implements BooksDAO {
         }
     }
 
+    public void remove(Books book) throws SQLException{
+        PreparedStatement preparedStatement = null;
+        String sql = "DELETE FROM books WHERE id=?";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1,book.getId());
+            preparedStatement.executeUpdate();
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        finally {
+            if (preparedStatement != null){
+                preparedStatement.close();
+            }
+        }
+    }
 }
